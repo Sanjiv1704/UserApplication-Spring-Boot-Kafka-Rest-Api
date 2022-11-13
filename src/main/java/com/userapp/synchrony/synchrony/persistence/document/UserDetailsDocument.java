@@ -21,14 +21,14 @@ public class UserDetailsDocument {
     private String password;
     private String userEmail;
     private String designation;
-    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-    @JoinTable(name="user_images",
-            joinColumns = {
-            @JoinColumn(name = "user_id")
-            },
-            inverseJoinColumns = {
-            @JoinColumn(name = "image_id")
-            }
-    )
-    private Set<ImageDocument> imageDocuments;
+//    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+//    @JoinTable(name="user_images",
+//            joinColumns = {
+//            @JoinColumn(name = "user_id")
+//            },
+//            inverseJoinColumns = {
+//            @JoinColumn(name = "image_id")
+//            }
+//    )
+//    private Set<ImageDocument> imageDocuments;
 }

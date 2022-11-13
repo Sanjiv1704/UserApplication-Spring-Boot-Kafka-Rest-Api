@@ -4,13 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDetailsDTO {
-    private String userName;
-    private String password;
-    private String userEmail;
-    private String designation;
+public class ImageResponseDoc {
+    private DataDTO dataDTO;
+    private Boolean success;
+    private Integer status;
 }
