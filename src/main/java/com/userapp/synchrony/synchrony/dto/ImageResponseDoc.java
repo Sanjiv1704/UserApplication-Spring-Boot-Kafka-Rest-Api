@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ImageResponseDoc {
-    private DataDTO dataDTO;
+    private DataDTO data;
     private Boolean success;
     private Integer status;
 }

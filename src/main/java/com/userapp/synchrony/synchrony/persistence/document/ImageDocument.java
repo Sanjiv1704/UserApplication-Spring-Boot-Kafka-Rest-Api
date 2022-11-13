@@ -18,7 +18,8 @@ public class ImageDocument {
     private Long id;
     private String name;
     private String type;
-    @Column(length = 50000000)
-    private byte[] picByte;
+    private String imageId;
+    private String deleteHashId;
+    private String imageUrl;
 
 }
