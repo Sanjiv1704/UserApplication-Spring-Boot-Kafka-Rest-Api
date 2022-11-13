@@ -2,6 +2,7 @@ package com.userapp.synchrony.synchrony.controller;
 
 import com.userapp.synchrony.synchrony.dto.ImageResponseDoc;
 import com.userapp.synchrony.synchrony.dto.UserDetailsDTO;
+import com.userapp.synchrony.synchrony.dto.UserImageTemplate;
 import com.userapp.synchrony.synchrony.persistence.document.ImageDocument;
 import com.userapp.synchrony.synchrony.persistence.document.UserDetailsDocument;
 import com.userapp.synchrony.synchrony.service.UserService;
@@ -39,16 +40,20 @@ public class UserController {
     KafkaTemplate kafkaTemplate;
 
     private static final String TOPIC="USER_DETAILS";
-    private static final String IMGUR_CLIENT_ID ="33cfb47eb320ec8";
-//    private static final Logger logger = (Logger) LoggerFactory.getLogger(UserController.class);
 
-
+    /**
+     *
+     * @param userDetailsDTO
+     * @param file
+     * @return endpoint will return userDetails and image related to user.
+     */
     @PostMapping("/createUserDetails")
     ResponseEntity<UserDetailsDocument>createUserDetail(@RequestPart("json") UserDetailsDTO userDetailsDTO, @RequestPart("image") MultipartFile file){
         UserDetailsDocument requestDoc = new UserDetailsDocument();
         BeanUtils.copyProperties(userDetailsDTO,requestDoc);
+        UserImageTemplate template = new UserImageTemplate();
         try {
-            ImageResponseDoc image =uploadImageImgur(file);
+            ImageResponseDoc image = userService.uploadImageImgur(file);
             if(Objects.nonNull(image.getData())) {
                 Set<ImageDocument> imageDocumentSet = new HashSet<>();
                 ImageDocument doc = new ImageDocument();
@@ -59,6 +64,11 @@ public class UserController {
                 doc.setDeleteHashId(image.getData().getDeletehash());
                 imageDocumentSet.add(doc);
                 requestDoc.setImageDocuments(imageDocumentSet);
+
+                template.setUserName(userDetailsDTO.getUserName());
+                template.setImageName(file.getName());
+                template.setImageUrl(doc.getImageUrl());
+                template.setOpType("I");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -66,41 +76,100 @@ public class UserController {
         UserDetailsDocument userDetailsDocument =userService.createUserDetails(requestDoc);
 
         if(Objects.nonNull(userDetailsDocument)) {
-            kafkaTemplate.send(TOPIC, userDetailsDocument);
+            kafkaTemplate.send(TOPIC, template);
 //            logger.info("Successfully published");
         }
         return new ResponseEntity<>(userDetailsDocument, HttpStatus.CREATED);
     }
 
 
-    public ImageResponseDoc uploadImageImgur(MultipartFile file) throws IOException {
-        Path tempFile = Files.createTempFile(null, null);
-
-        Files.write(tempFile, file.getBytes());
-        File fileToSend = tempFile.toFile();
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.add("Authorization", "Client-ID " + IMGUR_CLIENT_ID);
-        MultiValueMap<String, Object> body
-                = new LinkedMultiValueMap<>();
-        body.add("image",new FileSystemResource(fileToSend));
-        HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
-        ResponseEntity<ImageResponseDoc> response = restTemplate.exchange("https://api.imgur.com/3/upload", HttpMethod.POST, entity, ImageResponseDoc.class);
-        return response.getBody();
-    }
-
+    /**
+     *
+     * @param userName
+     * @return userDetailsDocument by userName
+     */
     @GetMapping("/getUserByUserName/{userName}")
     ResponseEntity<UserDetailsDocument>getUserDetails(@PathVariable String userName){
         UserDetailsDocument userDetailsDocument =userService.getUserByUserName(userName);
         if(Objects.nonNull(userDetailsDocument)){
             return new ResponseEntity<>(userDetailsDocument,HttpStatus.OK);
         }else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new UserDetailsDocument(), HttpStatus.NOT_FOUND);
         }
     }
 
-//    @PostMapping("/updateUserDetails")
-//    ResponseEntity<UserDetailsDocument>updateUserDetails(@RequestBody UserDetailsDocument userDetailsDocument){
-//    }
+    /**
+     *
+     * @param userDetailsDocument
+     * @param file
+     * @return updates the all the details of user
+     */
+    @PostMapping("/updateUserDetails")
+    ResponseEntity<UserDetailsDocument>updateUserDetails(@RequestPart("json") UserDetailsDocument userDetailsDocument ,@RequestPart("image")MultipartFile file){
+        UserImageTemplate template = new UserImageTemplate();
+        try {
+            ImageResponseDoc image =userService.uploadImageImgur(file);
+            if(Objects.nonNull(image.getData())) {
+                Set<ImageDocument> imageDocumentSet = new HashSet<>();
+                ImageDocument doc = new ImageDocument();
+                doc.setImageId(image.getData().getId());
+                doc.setName(file.getName());
+                doc.setType(file.getContentType());
+                doc.setImageUrl(image.getData().getLink());
+                doc.setDeleteHashId(image.getData().getDeletehash());
+                imageDocumentSet.addAll(userDetailsDocument.getImageDocuments());
+                imageDocumentSet.add(doc);
+                userDetailsDocument.setImageDocuments(imageDocumentSet);
+
+                template.setUserName(userDetailsDocument.getUserName());
+                template.setImageName(file.getName());
+                template.setImageUrl(doc.getImageUrl());
+                template.setOpType("U");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        UserDetailsDocument responseDoc = userService.updateUserDetails(userDetailsDocument);
+        if(Objects.nonNull(responseDoc)) {
+            kafkaTemplate.send(TOPIC, template);
+        }
+        return new ResponseEntity<>(responseDoc,HttpStatus.ACCEPTED);
+    }
+
+    /**
+     *
+     * @param imageId
+     */
+    @GetMapping("/getImageDetails/{imageId}")
+    public ResponseEntity<ImageDocument>getImageDetails(@PathVariable String imageId){
+        ImageDocument responseDoc =userService.getImageDetails(imageId);
+        if(Objects.nonNull(responseDoc)) {
+            return new ResponseEntity<>(responseDoc, HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(new ImageDocument(),HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     *
+     * @param userName
+     * @param deleteHashId
+     * @return return a updated document after deleting Image Details using deleteHashId from userDocument.
+     */
+    @PostMapping("/deleteImageFromUser/{userName}/{deleteHashId}")
+    public ResponseEntity<UserDetailsDocument>deleteImageForUser(@PathVariable String userName,@PathVariable String deleteHashId){
+        UserDetailsDocument responseDoc =userService.deleteImageFromUser(userName,deleteHashId);
+        return new ResponseEntity<>(responseDoc,HttpStatus.OK);
+    }
+
+    /**
+     *
+     * @param userName
+     */
+    @DeleteMapping("/deleteUser/{userName}")
+    public ResponseEntity<UserDetailsDocument>deleteUser(@PathVariable String userName){
+        UserDetailsDocument userDetailsDocument =userService.deleteUser(userName);
+        return new ResponseEntity<>(userDetailsDocument,HttpStatus.OK);
+    }
 }
