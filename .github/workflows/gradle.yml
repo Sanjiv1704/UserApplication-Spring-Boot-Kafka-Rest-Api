@@ -10,5 +10,7 @@ jobs:
         with:
           java-version: 23
           distribution: 'adopt'
+      - name: Set Gradlew Permissions
+        run: chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew build
