@@ -48,7 +48,7 @@ public class UserService {
     }
 
     public UserDetailsDocument getUserByUserName(String userName) {
-        if (Objects.nonNull(userName) || userName.isEmpty()) {
+        if (Objects.nonNull(userName)) {
             UserDetailsDocument resDoc = userRepository.findByUserName(userName);
             return resDoc;
         } else {

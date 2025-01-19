@@ -6,55 +6,43 @@ import com.userapp.synchrony.synchrony.dto.UserImageTemplate;
 import com.userapp.synchrony.synchrony.persistence.document.ImageDocument;
 import com.userapp.synchrony.synchrony.persistence.document.UserDetailsDocument;
 import com.userapp.synchrony.synchrony.service.UserService;
-import org.apache.catalina.User;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import javax.print.ServiceUI;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.logging.Logger;
 
+@Slf4j
 @RestController
 @RequestMapping("/userApplication")
 public class UserController {
+    private static final String TOPIC = "USER_DETAILS";
     @Autowired
     UserService userService;
     @Autowired
     KafkaTemplate kafkaTemplate;
 
-    private static final String TOPIC="USER_DETAILS";
-
     /**
-     *
      * @param userDetailsDTO
      * @param file
      * @return endpoint will return userDetails and image related to user.
      */
     @PostMapping("/createUserDetails")
-    ResponseEntity<UserDetailsDocument>createUserDetail(@RequestPart("json") UserDetailsDTO userDetailsDTO, @RequestPart("image") MultipartFile file){
+    ResponseEntity<UserDetailsDocument> createUserDetail(@RequestPart("json") UserDetailsDTO userDetailsDTO, @RequestPart("image") MultipartFile file) {
         UserDetailsDocument requestDoc = new UserDetailsDocument();
-        BeanUtils.copyProperties(userDetailsDTO,requestDoc);
+        BeanUtils.copyProperties(userDetailsDTO, requestDoc);
         UserImageTemplate template = new UserImageTemplate();
         try {
             ImageResponseDoc image = userService.uploadImageImgur(file);
-            if(Objects.nonNull(image.getData())) {
+            if (Objects.nonNull(image.getData())) {
                 Set<ImageDocument> imageDocumentSet = new HashSet<>();
                 ImageDocument doc = new ImageDocument();
                 doc.setImageId(image.getData().getId());
@@ -73,43 +61,40 @@ public class UserController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        UserDetailsDocument userDetailsDocument =userService.createUserDetails(requestDoc);
+        UserDetailsDocument userDetailsDocument = userService.createUserDetails(requestDoc);
 
-        if(Objects.nonNull(userDetailsDocument)) {
+        if (Objects.nonNull(userDetailsDocument)) {
             kafkaTemplate.send(TOPIC, template);
-//            logger.info("Successfully published");
         }
         return new ResponseEntity<>(userDetailsDocument, HttpStatus.CREATED);
     }
 
 
     /**
-     *
      * @param userName
      * @return userDetailsDocument by userName
      */
     @GetMapping("/getUserByUserName/{userName}")
-    ResponseEntity<UserDetailsDocument>getUserDetails(@PathVariable String userName){
-        UserDetailsDocument userDetailsDocument =userService.getUserByUserName(userName);
-        if(Objects.nonNull(userDetailsDocument)){
-            return new ResponseEntity<>(userDetailsDocument,HttpStatus.OK);
-        }else {
+    ResponseEntity<UserDetailsDocument> getUserDetails(@PathVariable String userName) {
+        UserDetailsDocument userDetailsDocument = userService.getUserByUserName(userName);
+        if (Objects.nonNull(userDetailsDocument)) {
+            return new ResponseEntity<>(userDetailsDocument, HttpStatus.OK);
+        } else {
             return new ResponseEntity<>(new UserDetailsDocument(), HttpStatus.NOT_FOUND);
         }
     }
 
     /**
-     *
      * @param userDetailsDocument
      * @param file
      * @return updates the all the details of user
      */
     @PostMapping("/updateUserDetails")
-    ResponseEntity<UserDetailsDocument>updateUserDetails(@RequestPart("json") UserDetailsDocument userDetailsDocument ,@RequestPart("image")MultipartFile file){
+    ResponseEntity<UserDetailsDocument> updateUserDetails(@RequestPart("json") UserDetailsDocument userDetailsDocument, @RequestPart("image") MultipartFile file) {
         UserImageTemplate template = new UserImageTemplate();
         try {
-            ImageResponseDoc image =userService.uploadImageImgur(file);
-            if(Objects.nonNull(image.getData())) {
+            ImageResponseDoc image = userService.uploadImageImgur(file);
+            if (Objects.nonNull(image.getData())) {
                 Set<ImageDocument> imageDocumentSet = new HashSet<>();
                 ImageDocument doc = new ImageDocument();
                 doc.setImageId(image.getData().getId());
@@ -131,45 +116,43 @@ public class UserController {
         }
 
         UserDetailsDocument responseDoc = userService.updateUserDetails(userDetailsDocument);
-        if(Objects.nonNull(responseDoc)) {
+        if (Objects.nonNull(responseDoc)) {
             kafkaTemplate.send(TOPIC, template);
+            log.info("Successfully published");
         }
-        return new ResponseEntity<>(responseDoc,HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responseDoc, HttpStatus.ACCEPTED);
     }
 
     /**
-     *
      * @param imageId
      */
     @GetMapping("/getImageDetails/{imageId}")
-    public ResponseEntity<ImageDocument>getImageDetails(@PathVariable String imageId){
-        ImageDocument responseDoc =userService.getImageDetails(imageId);
-        if(Objects.nonNull(responseDoc)) {
+    public ResponseEntity<ImageDocument> getImageDetails(@PathVariable String imageId) {
+        ImageDocument responseDoc = userService.getImageDetails(imageId);
+        if (Objects.nonNull(responseDoc)) {
             return new ResponseEntity<>(responseDoc, HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>(new ImageDocument(),HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(new ImageDocument(), HttpStatus.NOT_FOUND);
         }
     }
 
     /**
-     *
      * @param userName
      * @param deleteHashId
      * @return return a updated document after deleting Image Details using deleteHashId from userDocument.
      */
     @PostMapping("/deleteImageFromUser/{userName}/{deleteHashId}")
-    public ResponseEntity<UserDetailsDocument>deleteImageForUser(@PathVariable String userName,@PathVariable String deleteHashId){
-        UserDetailsDocument responseDoc =userService.deleteImageFromUser(userName,deleteHashId);
-        return new ResponseEntity<>(responseDoc,HttpStatus.OK);
+    public ResponseEntity<UserDetailsDocument> deleteImageForUser(@PathVariable String userName, @PathVariable String deleteHashId) {
+        UserDetailsDocument responseDoc = userService.deleteImageFromUser(userName, deleteHashId);
+        return new ResponseEntity<>(responseDoc, HttpStatus.OK);
     }
 
     /**
-     *
      * @param userName
      */
     @DeleteMapping("/deleteUser/{userName}")
-    public ResponseEntity<UserDetailsDocument>deleteUser(@PathVariable String userName){
-        UserDetailsDocument userDetailsDocument =userService.deleteUser(userName);
-        return new ResponseEntity<>(userDetailsDocument,HttpStatus.OK);
+    public ResponseEntity<UserDetailsDocument> deleteUser(@PathVariable String userName) {
+        UserDetailsDocument userDetailsDocument = userService.deleteUser(userName);
+        return new ResponseEntity<>(userDetailsDocument, HttpStatus.OK);
     }
 }
