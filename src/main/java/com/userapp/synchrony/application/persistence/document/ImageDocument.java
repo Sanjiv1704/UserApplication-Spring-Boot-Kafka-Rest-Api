@@ -1,8 +1,7 @@
-package com.userapp.synchrony.synchrony.persistence.document;
+package com.userapp.synchrony.application.persistence.document;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Generated;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;

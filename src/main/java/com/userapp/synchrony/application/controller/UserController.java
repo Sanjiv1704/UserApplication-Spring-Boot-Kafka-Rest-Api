@@ -1,11 +1,11 @@
-package com.userapp.synchrony.synchrony.controller;
+package com.userapp.synchrony.application.controller;
 
-import com.userapp.synchrony.synchrony.dto.ImageResponseDoc;
-import com.userapp.synchrony.synchrony.dto.UserDetailsDTO;
-import com.userapp.synchrony.synchrony.dto.UserImageTemplate;
-import com.userapp.synchrony.synchrony.persistence.document.ImageDocument;
-import com.userapp.synchrony.synchrony.persistence.document.UserDetailsDocument;
-import com.userapp.synchrony.synchrony.service.UserService;
+import com.userapp.synchrony.application.dto.ImageResponseDoc;
+import com.userapp.synchrony.application.dto.UserDetailsDTO;
+import com.userapp.synchrony.application.dto.UserImageTemplate;
+import com.userapp.synchrony.application.persistence.document.ImageDocument;
+import com.userapp.synchrony.application.persistence.document.UserDetailsDocument;
+import com.userapp.synchrony.application.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +29,12 @@ public class UserController {
     UserService userService;
     @Autowired
     KafkaTemplate kafkaTemplate;
+
+    @GetMapping("/welcome")
+    ResponseEntity<String> getWelcomeMessage(){
+        return new ResponseEntity<>("Welcome to User Image",HttpStatus.OK);
+    }
+
 
     /**
      * @param userDetailsDTO

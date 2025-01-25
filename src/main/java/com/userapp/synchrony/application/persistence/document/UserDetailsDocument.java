@@ -1,11 +1,10 @@
-package com.userapp.synchrony.synchrony.persistence.document;
+package com.userapp.synchrony.application.persistence.document;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Set;
 
 @Data

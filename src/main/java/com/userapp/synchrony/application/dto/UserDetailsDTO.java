@@ -1,10 +1,9 @@
-package com.userapp.synchrony.synchrony.dto;
+package com.userapp.synchrony.application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
