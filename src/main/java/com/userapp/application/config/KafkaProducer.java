@@ -1,6 +1,6 @@
-package com.userapp.synchrony.application.config;
+package com.userapp.application.config;
 
-import com.userapp.synchrony.application.dto.UserImageTemplate;
+import com.userapp.application.dto.UserImageTemplate;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;

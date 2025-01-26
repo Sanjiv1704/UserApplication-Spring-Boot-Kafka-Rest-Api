@@ -1,10 +1,10 @@
-package com.userapp.synchrony.application;
+package com.userapp.application;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SynchronyApplicationTests {
+class UserApplicationTests {
 
 	@Test
 	void contextLoads() {

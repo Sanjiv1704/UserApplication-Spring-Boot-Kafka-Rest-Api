@@ -1,6 +1,6 @@
-package com.userapp.synchrony.application.persistence.repositories;
+package com.userapp.application.persistence.repositories;
 
-import com.userapp.synchrony.application.persistence.document.ImageDocument;
+import com.userapp.application.persistence.document.ImageDocument;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

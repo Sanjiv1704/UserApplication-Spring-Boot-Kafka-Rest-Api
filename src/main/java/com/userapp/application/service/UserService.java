@@ -1,10 +1,10 @@
-package com.userapp.synchrony.application.service;
+package com.userapp.application.service;
 
-import com.userapp.synchrony.application.dto.ImageResponseDoc;
-import com.userapp.synchrony.application.persistence.document.ImageDocument;
-import com.userapp.synchrony.application.persistence.document.UserDetailsDocument;
-import com.userapp.synchrony.application.persistence.repositories.ImageRepository;
-import com.userapp.synchrony.application.persistence.repositories.UserRepository;
+import com.userapp.application.dto.ImageResponseDoc;
+import com.userapp.application.persistence.document.ImageDocument;
+import com.userapp.application.persistence.document.UserDetailsDocument;
+import com.userapp.application.persistence.repositories.ImageRepository;
+import com.userapp.application.persistence.repositories.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;

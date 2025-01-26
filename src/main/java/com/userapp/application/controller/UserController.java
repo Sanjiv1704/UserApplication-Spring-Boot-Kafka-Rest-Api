@@ -1,11 +1,11 @@
-package com.userapp.synchrony.application.controller;
+package com.userapp.application.controller;
 
-import com.userapp.synchrony.application.dto.ImageResponseDoc;
-import com.userapp.synchrony.application.dto.UserDetailsDTO;
-import com.userapp.synchrony.application.dto.UserImageTemplate;
-import com.userapp.synchrony.application.persistence.document.ImageDocument;
-import com.userapp.synchrony.application.persistence.document.UserDetailsDocument;
-import com.userapp.synchrony.application.service.UserService;
+import com.userapp.application.dto.ImageResponseDoc;
+import com.userapp.application.dto.UserDetailsDTO;
+import com.userapp.application.dto.UserImageTemplate;
+import com.userapp.application.persistence.document.ImageDocument;
+import com.userapp.application.persistence.document.UserDetailsDocument;
+import com.userapp.application.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class UserController {
 
     @GetMapping("/welcome")
     ResponseEntity<String> getWelcomeMessage(){
-        return new ResponseEntity<>("Welcome to User Image",HttpStatus.OK);
+        return new ResponseEntity<>("Welcome to User Application",HttpStatus.OK);
     }
 
 

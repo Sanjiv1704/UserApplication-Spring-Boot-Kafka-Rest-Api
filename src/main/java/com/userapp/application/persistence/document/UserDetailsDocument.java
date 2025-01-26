@@ -1,4 +1,4 @@
-package com.userapp.synchrony.application.persistence.document;
+package com.userapp.application.persistence.document;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

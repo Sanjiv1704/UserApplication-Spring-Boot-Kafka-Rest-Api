@@ -1,4 +1,4 @@
-package com.userapp.synchrony.application.dto;
+package com.userapp.application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
